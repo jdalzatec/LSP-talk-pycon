@@ -2,6 +2,7 @@ from typing import List
 
 from source.bank_account import BankAccount
 from source.employee import Contractor, Employee
+from source.exceptions import PayrollError, NoEntriesError
 from source.payroll_entry import PayrollEntry
 from source.report import Report, JSONReport
 
@@ -26,24 +27,28 @@ class Payroll:
         return payroll_entry
 
     def create_report(self) -> Report:
+        if not self._daily_payments_entries:
+            raise PayrollError("No entries to generate report")
         return Report(self._daily_payments_entries)
 
     def pay(self):
         total = sum(entry.payment for entry in self._daily_payments_entries)
         if total > self.bank_account.balance:
-            raise ValueError('Not enough funds')
+            raise ValueError("Not enough funds")
 
         self.bank_account.withdraw(total)
-        self._daily_payments_entries = []
 
+        # post-conditions
+        self._daily_payments_entries = []
         if self.bank_account.balance < 1_000:
-            print('Send an email notifying this')
+            print("Send an email notifying this")
+            print("Do other stuff")
 
 
 class EmployeePayroll(Payroll):
     def add_daily_pay(self, date: str, employee: Employee) -> PayrollEntry:
-        deductions_percentage = 16.0 if employee.type == 'Employee' else 24.0
-        tax_percentage = 8.0 if employee.type == 'Employee' else 6.0
+        deductions_percentage = 16.0 if employee.type == "Employee" else 24.0
+        tax_percentage = 8.0 if employee.type == "Employee" else 6.0
         daily_payment = employee.calculate_daily_payment()
         payroll_entry = PayrollEntry(
             employee_id=employee.id,
@@ -58,14 +63,15 @@ class EmployeePayroll(Payroll):
         return payroll_entry
 
     def create_report(self) -> JSONReport:
-        # Adding extra validations violates the LSP because we are strengthening the pre-conditions
-        if len(self._daily_payments_entries) == 0:
-            raise Exception('No entries to generate report')
+        if not self._daily_payments_entries:
+            raise NoEntriesError("No entries to generate report")
         return JSONReport(self._daily_payments_entries)
 
     def pay(self):
         total = sum(entry.payment for entry in self._daily_payments_entries)
+        if total > self.bank_account.balance:
+            raise ValueError("Not enough funds")
+
         self.bank_account.withdraw(total)
-        self._daily_payments_entries = []
-        # Removing the validations at the end of the method vilates the LSP because we are
+        # Removing the validations at the end of the method violates the LSP because we are
         # weakening the post-conditions

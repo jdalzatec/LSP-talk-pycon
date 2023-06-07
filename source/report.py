@@ -1,5 +1,5 @@
 import json
-from typing import List, Dict
+from typing import List
 
 from source.payroll_entry import PayrollEntry
 
@@ -9,10 +9,12 @@ class Report:
         self.entries = entries
 
     def generate(self) -> str:
-        output = ''
+        output = ""
         for entry in self.entries:
-            output += '\n'.join(f'{key}: {value}' for key, value in entry.to_dict().items())
-            output += '\n' + '-' * 50 + '\n'
+            output += "\n".join(
+                f"{key}: {value}" for key, value in entry.to_dict().items()
+            )
+            output += "\n" + "-" * 50 + "\n"
         return output
 
 

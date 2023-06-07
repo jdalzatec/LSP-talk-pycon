@@ -2,7 +2,7 @@ class Employee:
     def __init__(self, id: int, name: str):
         self.id = id
         self.name = name
-        self.type = 'Employee'
+        self.type = "Employee"
 
     def calculate_daily_payment(self) -> float:
         # must be greater than zero
@@ -14,7 +14,7 @@ class Contractor(Employee):
         super().__init__(id, name)
         self.hourly_rate = hourly_rate
         self.hours_per_day = hours_per_day
-        self.type = 'Contractor'
+        self.type = "Contractor"
 
     def calculate_daily_payment(self) -> float:
         # must be greater than zero

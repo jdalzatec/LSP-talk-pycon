@@ -6,6 +6,4 @@ class BankAccount:
         self.balance += amount
 
     def withdraw(self, amount: float):
-        if amount > self.balance:
-            raise ValueError('Not enough funds')
         self.balance -= amount
